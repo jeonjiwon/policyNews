@@ -3,11 +3,13 @@ package com.project.policyNews.controller;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.policyNews.PolicyNewsApplication;
 import com.project.policyNews.entity.User;
 import com.project.policyNews.model.Auth;
 import com.project.policyNews.security.JwtAuthenticationFilter;
 import com.project.policyNews.security.JwtTokenProvider;
 import com.project.policyNews.service.UserService;
+import jakarta.transaction.Transactional;
 import java.util.Arrays;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,52 +28,48 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import com.google.gson.Gson;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-//@SpringBootTest
-@WebMvcTest(UserController.class)
+
+@SpringBootTest(classes = PolicyNewsApplication.class)
+@AutoConfigureMockMvc
 class UserControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
 
-  @MockBean
+  @Autowired
   private UserService userService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
-  @MockBean
+  @Autowired
   private JwtTokenProvider jwtTokenProvider;
 
   @Test
+  @Transactional
   public void 회원가입_성공() throws Exception {
 
     //given
     Auth.register user = new Auth.register();
-    user.setUsername("testuser");
-    user.setPassword("password123");
+    user.setUsername("test1");
+    user.setPassword("pw1");
     user.setRoles(Arrays.asList("USER"));
-    Gson gson = new Gson();
-    String content = gson.toJson(user);
 
     //when
     ResultActions actions = mockMvc.perform(
         MockMvcRequestBuilders.
             post("/auth/register")
-            .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(content))
+            .content(objectMapper.writeValueAsString(user))
     );
 
     //then
     MvcResult mvcResult = actions.andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().string("User registered successfully"))
+        .andExpect(MockMvcResultMatchers.content().string("회원가입이 성공적으로 처리되었습니다."))
         .andReturn();
 
     String response = mvcResult.getResponse().getContentAsString();
-    Assertions.assertThat(response).isEqualTo("User registered successfully");
+    Assertions.assertThat(response).isEqualTo("회원가입이 성공적으로 처리되었습니다.");
 
   }
 }
