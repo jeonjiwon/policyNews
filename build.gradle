@@ -33,8 +33,18 @@ dependencies {
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'com.google.code.gson:gson:2.10.1'
+
+	testImplementation 'org.mockito:mockito-core:4.11.0' // Mockito
+	testImplementation 'org.springframework.security:spring-security-test' // Spring Security 테스트 지원
 }
 
 tasks.named('test') {
