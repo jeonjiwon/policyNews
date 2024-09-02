@@ -7,8 +7,6 @@ import com.project.policyNews.service.UserService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,18 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
-  private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+  private final UserService userService;
 
-  final private UserService userService;
-
-  final private JwtTokenProvider jwtTokenProvider;
+  private final JwtTokenProvider jwtTokenProvider;
 
   // 회원가입
   @PostMapping("/register")
   public ResponseEntity<?> register(@RequestBody Auth.register user) {
 
     if (userService.userExists(user.getUsername())) {
-      logger.warn("이미 회원가입된 ID 입니다.");
+      log.warn("이미 회원가입된 ID 입니다.");
       return ResponseEntity.badRequest().body("이미 회원가입된 ID 입니다.");
     }
     if (user.getRoles() == null || user.getRoles().isEmpty()) {
@@ -40,7 +36,7 @@ public class UserController {
     }
     User newUser = userService.registerUser(user);
 
-    logger.info("회원가입이 성공적으로 처리되었습니다. [" + user.getUsername() +"]");
+    log.info("회원가입이 성공적으로 처리되었습니다. [{}]", user.getUsername());
     return ResponseEntity.ok("회원가입이 성공적으로 처리되었습니다.");
   }
 
