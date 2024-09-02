@@ -32,7 +32,7 @@ public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long user_id;
+  private Long userId;
 
   @Column(nullable = false)
   private String username;
@@ -44,9 +44,9 @@ public class User {
   private List<String> roles;
 
   @CreatedDate
-  private LocalDateTime created_date;
+  private LocalDateTime createdDateTime;
   @LastModifiedDate
-  private LocalDateTime updated_date;
+  private LocalDateTime updatedDateTime;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return roles.stream()
