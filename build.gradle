@@ -27,6 +27,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -42,6 +43,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'com.google.code.gson:gson:2.10.1'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
 	testImplementation 'org.mockito:mockito-core:4.11.0' // Mockito
 	testImplementation 'org.springframework.security:spring-security-test' // Spring Security 테스트 지원
