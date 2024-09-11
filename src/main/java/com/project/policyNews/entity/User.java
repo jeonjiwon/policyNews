@@ -1,11 +1,13 @@
 package com.project.policyNews.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -42,6 +44,9 @@ public class User {
 
   @Column(nullable = false)
   private List<String> roles;
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Category> categories;
 
   @CreatedDate
   private LocalDateTime createdDateTime;
