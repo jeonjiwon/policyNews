@@ -1,6 +1,6 @@
 package type;
 
-public enum NewsType {
+public enum NewsTypeEnumerated {
   H,  //html
   T   //text
 }

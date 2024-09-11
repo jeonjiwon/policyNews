@@ -5,12 +5,9 @@ import ch.qos.logback.core.util.StringUtil;
 import com.project.policyNews.config.OpenApiConfig;
 import com.project.policyNews.entity.News;
 import com.project.policyNews.repository.NewsRepository;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.URI;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,88 +15,74 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import type.NewsState;
-import type.NewsType;
+import type.NewsStateEnumerated;
+import type.NewsTypeEnumerated;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
+//@AllArgsConstructor
 public class NewsOpenApiService {
 
   private final OpenApiConfig apiDataConfig;
 
   private final NewsRepository newsRepository;
 
-  public void newsPolicyApiCall(String searchDate) {
-    StringBuilder urlBuilder = null;
-    HttpURLConnection conn = null;
-    StringBuilder sb = new StringBuilder();
+  private final WebClient webClient;
 
+
+  public NewsOpenApiService(OpenApiConfig apiDataConfig, NewsRepository newsRepository,
+      WebClient.Builder webClientBuilder) {
+    this.apiDataConfig = apiDataConfig;
+    this.newsRepository = newsRepository;
+    this.webClient = webClientBuilder.build();
+  }
+
+  public void newsPolicyApiCall(LocalDate searchDate) {
     try {
-      urlBuilder = new StringBuilder(apiDataConfig.getUrl());
-      urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "="
-          + apiDataConfig.getKey()); /*Service Key*/
-      urlBuilder.append(
-          "&" + URLEncoder.encode("startDate", "UTF-8") + "=" + URLEncoder.encode(searchDate,
-              "UTF-8")); /*검색시작일자*/
-      urlBuilder.append(
-          "&" + URLEncoder.encode("endDate", "UTF-8") + "=" + URLEncoder.encode(searchDate,
-              "UTF-8")); /*검색종료일자*/
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-      URL url = new URL(urlBuilder.toString());
-      conn = (HttpURLConnection) url.openConnection();
-      conn.setRequestMethod("GET");
-      conn.setRequestProperty("Content-type", "application/json");
+      URI uri = UriComponentsBuilder.fromUriString(apiDataConfig.getUrl())
+          .queryParam("serviceKey", apiDataConfig.getKey())
+          .queryParam("startDate", searchDate.format(formatter))
+          .queryParam("endDate", searchDate.format(formatter))
+          .build()
+          .toUri();
 
-      System.out.println("Response code: " + conn.getResponseCode());
+      String responseBody = webClient
+          .get()
+          .uri(uri)
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
 
-      BufferedReader rd = null;
-      if (conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
-        rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        String line;
-        while ((line = rd.readLine()) != null) {
-          sb.append(line);
-        }
-        System.out.println(sb.toString());
-
-        // 성공 시에만 데이터 파싱
-        parseAndStoreData(searchDate, sb.toString());
-
-      } else {
-        rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-      }
-
-      if (rd != null) {
-        rd.close();
-      }
-      if (conn != null) {
-        conn.disconnect();
-      }
+      // 응답 코드 로그
+      log.info("Response code: " + responseBody);
+      parseAndStoreData(searchDate, responseBody);
 
     } catch (Exception e) {
-      if (conn != null) {
-        conn.disconnect();
-      }
       throw new RuntimeException(e.getMessage());
     }
   }
 
 
-  public void parseAndStoreData(String standardDate, String Content) {
+  public void parseAndStoreData(LocalDate standardDate, String Content) {
     List<News> result = new ArrayList<>();
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
     try {
       if (Content == null || Content.isEmpty()) {
-        System.out.println("Content is null or empty");
+        log.info("{} 일 -> 처리할 데이터가 없습니다. ", standardDate);
       }
 
       if (Content.startsWith("<?xml")) {
@@ -121,8 +104,8 @@ public class NewsOpenApiService {
       // body
       NodeList newsItemList = root.getElementsByTagName("NewsItem");
       if ("0".equals(resultCode)) {
-        System.out.println("Success: " + resultMsg);
-        if(newsItemList.getLength() > 0) {
+        log.info("Success: " + resultMsg);
+        if (newsItemList.getLength() > 0) {
           for (int i = 0; i < newsItemList.getLength(); i++) {
 
             Element newsElement = (Element) newsItemList.item(i);
@@ -134,8 +117,8 @@ public class NewsOpenApiService {
               newsItem.setStandardDate(standardDate);
               newsItem.setId(newsId);
               newsItem.setStatus(
-                  "I".equals(getElementValue(newsElement, "ContentsStatus")) ? NewsState.I
-                      : NewsState.U);
+                  "I".equals(getElementValue(newsElement, "ContentsStatus")) ? NewsStateEnumerated.I
+                      : NewsStateEnumerated.U);
               newsItem.setApproveDateTime(
                   StringUtil.isNullOrEmpty(getElementValue(newsElement, "ApproveDate")) ? null :
                       LocalDateTime.parse(getElementValue(newsElement, "ApproveDate"), formatter));
@@ -153,7 +136,8 @@ public class NewsOpenApiService {
               newsItem.setSubTitle2(getElementValue(newsElement, "SubTitle2"));
               newsItem.setSubTitle3(getElementValue(newsElement, "SubTitle3"));
               newsItem.setType(
-                  "H".equals(getElementValue(newsElement, "ContentsType")) ? NewsType.H : NewsType.T);
+                  "H".equals(getElementValue(newsElement, "ContentsType")) ? NewsTypeEnumerated.H
+                      : NewsTypeEnumerated.T);
               newsItem.setContents(getElementValue(newsElement, "DataContents"));
               newsItem.setMinisterCode(getElementValue(newsElement, "MinisterCode"));
               newsItem.setArticleUrl(getElementValue(newsElement, "OriginalUrl"));
@@ -164,8 +148,8 @@ public class NewsOpenApiService {
               newsItem.setStandardDate(standardDate);
               newsItem.setId(newsId);
               newsItem.setStatus(
-                  "I".equals(getElementValue(newsElement, "ContentsStatus")) ? NewsState.I
-                      : NewsState.U);
+                  "I".equals(getElementValue(newsElement, "ContentsStatus")) ? NewsStateEnumerated.I
+                      : NewsStateEnumerated.U);
               newsItem.setApproveDateTime(
                   StringUtil.isNullOrEmpty(getElementValue(newsElement, "ApproveDate")) ? null :
                       LocalDateTime.parse(getElementValue(newsElement, "ApproveDate"), formatter));
@@ -183,7 +167,8 @@ public class NewsOpenApiService {
               newsItem.setSubTitle2(getElementValue(newsElement, "SubTitle2"));
               newsItem.setSubTitle3(getElementValue(newsElement, "SubTitle3"));
               newsItem.setType(
-                  "H".equals(getElementValue(newsElement, "ContentsType")) ? NewsType.H : NewsType.T);
+                  "H".equals(getElementValue(newsElement, "ContentsType")) ? NewsTypeEnumerated.H
+                      : NewsTypeEnumerated.T);
               newsItem.setContents(getElementValue(newsElement, "DataContents"));
               newsItem.setMinisterCode(getElementValue(newsElement, "MinisterCode"));
               newsItem.setArticleUrl(getElementValue(newsElement, "OriginalUrl"));

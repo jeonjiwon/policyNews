@@ -1,13 +1,18 @@
 package com.project.policyNews.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,8 +21,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import type.NewsType;
-import type.NewsState;
+import type.NewsTypeEnumerated;
+import type.NewsStateEnumerated;
 
 @Entity
 @Table(name = "news")
@@ -32,19 +37,23 @@ public class News {
   private Long id;
 
   @Column(nullable = false)
-  private NewsState status;
+  private NewsStateEnumerated status;
 
-  @Column(nullable = false)
-  private String standardDate;
+  @JsonSerialize(using = LocalDateSerializer.class)
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+  private LocalDate standardDate;
 
-  @Column
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
+  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM/dd/yyyy HH:mm:ss")
   private LocalDateTime approveDateTime;
 
   @Column
   private String approverName;
 
-  @Column
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
+  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM/dd/yyyy HH:mm:ss")
   private LocalDateTime validDateTime;
 
@@ -64,7 +73,7 @@ public class News {
   private String subTitle3;
 
   @Column
-  private NewsType type;
+  private NewsTypeEnumerated type;
 
   @Column(length = 5000)
   private String contents;
@@ -74,12 +83,12 @@ public class News {
 
   @Column
   private String articleUrl;
-
-  @CreatedDate
-  private LocalDateTime createdDateTime;
-
-  @LastModifiedDate
-  private LocalDateTime updatedDateTime;
+//
+//  @CreatedDate
+//  private LocalDateTime createdDateTime;
+//
+//  @LastModifiedDate
+//  private LocalDateTime updatedDateTime;
 
   public void setContents(String contents) {
     if (contents != null && contents.length() > 5000) {

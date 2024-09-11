@@ -1,6 +1,7 @@
 package com.project.policyNews.controller;
 
 import com.project.policyNews.service.NewsService;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +27,14 @@ public class NewsController {
    */
   @GetMapping("/search")
   public ResponseEntity<?> searchNews(
-      @RequestParam(value = "searchDate") String searchDate,
+      @RequestParam(value = "searchDate") LocalDate searchDate,
       @RequestParam(value = "keyword", required = false) String keyword,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size) {
     try {
       return ResponseEntity.ok(newsService.searchNews(searchDate, keyword, page, size));
     } catch (Exception e) {
-      return ResponseEntity.ok(e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
 
   }

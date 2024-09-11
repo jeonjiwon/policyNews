@@ -45,6 +45,10 @@ dependencies {
 	implementation 'com.google.code.gson:gson:2.10.1'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
+//	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+//	implementation 'org.apache.httpcomponents:httpcore:4.4.15'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 	testImplementation 'org.mockito:mockito-core:4.11.0' // Mockito
 	testImplementation 'org.springframework.security:spring-security-test' // Spring Security 테스트 지원
 }
