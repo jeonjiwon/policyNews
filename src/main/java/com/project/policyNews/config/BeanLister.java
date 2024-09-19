@@ -17,5 +17,8 @@ public class BeanLister implements CommandLineRunner {
     for (String beanName : beanNames) {
       System.out.println(beanName);
     }
+    System.out.println("===================================================");
+    System.out.println("================= Server Started ==================");
+    System.out.println("===================================================");
   }
 }
