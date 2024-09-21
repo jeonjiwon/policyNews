@@ -1,7 +1,10 @@
 package com.project.policyNews.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.policyNews.converter.ListToJsonConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -17,9 +20,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -48,11 +51,12 @@ public class Bookmark {
   @JoinColumn(name = "user_id")
   private User user;
 
-  @Column(columnDefinition = "json")
-  private String tags;
+  @Convert(converter = ListToJsonConverter.class)
+//  @Column(name = "tags", columnDefinition = "json")
+  private List<String> tags;
 
   @CreatedDate
-  private LocalDateTime createdDateTime;
+  private LocalDateTime createdsDateTime;
   @LastModifiedDate
   private LocalDateTime updatedDateTime;
 

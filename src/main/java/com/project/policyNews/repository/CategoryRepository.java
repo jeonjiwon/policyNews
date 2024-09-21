@@ -13,9 +13,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
   @Query("SELECT c FROM Category c JOIN c.user u WHERE c.user.userId = :userId AND (:keyword IS NULL OR c.name LIKE %:keyword%)")
   List<Category> findAllByUserIdAndKeyword(@Param("userId") Long userId, @Param("keyword") String keyword);
 
-  @Query("SELECT c " +
-      "FROM Bookmark b " +
-      "JOIN b.category c " +
-      "WHERE b.category.categoryId = :categoryId")
-  List<Category> findByCategoryId(@Param("categoryId") Long categoryId);
+  boolean existsByNameAndUser_UserId(String name, Long userId);
 }

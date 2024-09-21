@@ -14,11 +14,8 @@ public class BeanLister implements CommandLineRunner {
   public void run(String... args) {
     // Bean 등록 확인
     String[] beanNames = applicationContext.getBeanDefinitionNames();
-    for (String beanName : beanNames) {
-      System.out.println(beanName);
-    }
-    System.out.println("===================================================");
-    System.out.println("================= Server Started ==================");
-    System.out.println("===================================================");
+//    for (String beanName : beanNames) {
+//      System.out.println(beanName);
+//    }
   }
 }
