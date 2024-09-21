@@ -18,11 +18,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import type.NewsTypeEnumerated;
 import type.NewsStateEnumerated;
+import type.NewsTypeEnumerated;
 
 @Entity
 @Table(name = "news")
@@ -41,7 +39,7 @@ public class News {
 
   @JsonSerialize(using = LocalDateSerializer.class)
   @JsonDeserialize(using = LocalDateDeserializer.class)
-  @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate standardDate;
 
   @JsonSerialize(using = LocalDateTimeSerializer.class)

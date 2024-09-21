@@ -1,5 +1,9 @@
 package com.project.policyNews.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.policyNews.converter.ListToJsonConverter;
+import jakarta.persistence.Convert;
+import java.util.Arrays;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,22 +18,19 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BookmarkDto {
   private Long categoryId;
-  private String name;
-  private Long userId;
-  private Long bookmarkId;
-  private Long id;
-  private String title;
-  private String tags;
-  private List<String> tagsList;
 
-  public BookmarkDto(Long categoryId, String name, Long userId, Long bookmarkId, Long id,
-      String title, String tags) {
-    this.categoryId = categoryId;
-    this.name = name;
-    this.userId = userId;
-    this.bookmarkId = bookmarkId;
-    this.id = id;
-    this.title = title;
-    this.tags = tags;
-  }
+  private String name;
+
+  private Long userId;
+
+  private Long bookmarkId;
+
+  private Long newsId;
+
+  private String title;
+
+//  @JsonProperty("tags")
+  @Convert(converter = ListToJsonConverter.class)
+  private List<String> tags;
+
 }

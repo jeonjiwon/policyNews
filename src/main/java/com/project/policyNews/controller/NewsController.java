@@ -9,12 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import type.ErrorCode;
 
 
 @Slf4j
 @RestController
-@RequestMapping("/news")
+@RequestMapping("/policy-news")
 @RequiredArgsConstructor
 public class NewsController {
 
@@ -25,7 +24,7 @@ public class NewsController {
    * 페이징(size고정), Redis 캐쉬 관리
    * 조회조건 :  조회일(필수), 키워드(선택-LIKE검색)
    */
-  @GetMapping("/search")
+  @GetMapping
   public ResponseEntity<?> searchNews(
       @RequestParam(value = "searchDate") LocalDate searchDate,
       @RequestParam(value = "keyword", required = false) String keyword,
