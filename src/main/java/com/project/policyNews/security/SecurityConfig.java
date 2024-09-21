@@ -30,7 +30,7 @@ public class SecurityConfig {
         )
         .authorizeHttpRequests(authorizeRequestsConfigurer ->
                 authorizeRequestsConfigurer
-                    .requestMatchers("/auth/register", "/auth/login", "/news/search").permitAll()
+                    .requestMatchers("/auth/register", "/auth/login", "/policy-news").permitAll()
                     .anyRequest().authenticated()  // 다른 모든 요청은 인증 필요
         )
         .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);  // JWT 인증 필터 추가

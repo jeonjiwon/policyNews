@@ -33,6 +33,10 @@ public class CategoryService {
     User user = userRepository.findById(category.getUserId())
         .orElseThrow(()-> new RuntimeException("유효하지 않은 사용자 입니다. "));
 
+    if(categoryRepository.existsByNameAndUser_UserId(category.getName(), category.getUserId())) {
+      throw new RuntimeException("이미 카테고리 등록된 명칭은 등록 불가합니다. ");
+    }
+
     Category newCategory = new Category();
     newCategory.setName(category.getName());
     newCategory.setUser(user);
