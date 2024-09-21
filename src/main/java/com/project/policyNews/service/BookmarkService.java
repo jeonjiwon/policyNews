@@ -12,6 +12,7 @@ import com.project.policyNews.repository.CategoryRepository;
 import com.project.policyNews.repository.NewsRepository;
 import com.project.policyNews.repository.UserRepository;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -109,16 +110,16 @@ public class BookmarkService {
     return bookmark;
   }
 
-  public void deleteBookMark(BookmarkDto bookmarkDto) throws Exception {
-    boolean existYn = userRepository.existsById(bookmarkDto.getUserId());
+  public void deleteBookMark(Long userId, Long bookmarkId) throws Exception {
+    boolean existYn = userRepository.existsById(userId);
     if (!existYn) {
       throw new RuntimeException("유효하지 않은 사용자 입니다. ");
     }
-    existYn = bookmarkRepository.existsById(bookmarkDto.getBookmarkId());
+    existYn = bookmarkRepository.existsById(bookmarkId);
     if (!existYn) {
       throw new RuntimeException("즐겨찾기 내역을 찾을 수 없습니다. ");
     }
-    bookmarkRepository.deleteById(bookmarkDto.getBookmarkId());
+    bookmarkRepository.deleteById(bookmarkId);
   }
 
   public Bookmark updateTags(Long bookmarkId, List<String> tags) throws Exception {
@@ -137,11 +138,17 @@ public class BookmarkService {
     Optional<Bookmark> optionalNews = bookmarkRepository.findById(bookmarkId);
     if (optionalNews.isPresent()) {
       Bookmark bookmark = optionalNews.get();
-      List<String> tags = bookmark.getTags();
-      tags.remove(tag);
-      bookmark.setTags(tags);
-      return bookmarkRepository.save(bookmark);
 
+      List<String> tagTmpList = new ArrayList<>(bookmark.getTags());
+
+      long count = tagTmpList.stream().filter(x-> x.equals(tag)).count();
+      if(count == 0) {
+        throw new RuntimeException("해당 태그 내역이 존재하지 않습니다. ");
+      }
+
+      tagTmpList.remove(tag);
+      bookmark.setTags(tagTmpList);
+      return bookmarkRepository.save(bookmark);
     } else {
       throw new RuntimeException("북마크 내역을 찾을 수 없습니다. ");
     }

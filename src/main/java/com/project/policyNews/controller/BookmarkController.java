@@ -70,9 +70,12 @@ public class BookmarkController {
    */
   @DeleteMapping("/bookmark")
   @PreAuthorize("hasRole('WRITE')")
-  public ResponseEntity<?> deleteBookMark(@RequestBody BookmarkDto bookmarkDto) {
+  public ResponseEntity<?> deleteBookMark(
+      @RequestParam(value = "userId") Long userId,
+      @RequestParam(value = "bookmarkId") Long bookmarkId
+  ) {
     try {
-      bookmarkService.deleteBookMark(bookmarkDto);
+      bookmarkService.deleteBookMark(userId, bookmarkId);
 
       return ResponseEntity.ok("즐겨찾기 해제되었습니다.");
 
@@ -105,7 +108,8 @@ public class BookmarkController {
       @RequestParam(value = "bookmarkId") Long bookmarkId,
       @RequestParam(value = "tag") String tag) {
     try {
-      return ResponseEntity.ok(bookmarkService.deleteTag(bookmarkId, tag));
+      ResponseEntity.ok(bookmarkService.deleteTag(bookmarkId, tag));
+      return ResponseEntity.ok("해당 명칭의 카테고리의 태그내역이 삭제되었습니다.");
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
